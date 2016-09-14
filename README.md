@@ -1,1 +1,2 @@
-# Xedule-rooster
+# Trip Search
+A trip search engine using **elasticsearch**
