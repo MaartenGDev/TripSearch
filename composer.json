@@ -1,0 +1,15 @@
+{
+  "name": "maartengdev/cache-drivers",
+  "minimum-stability": "stable",
+  "description": "Cache all data using different drivers",
+  "license": "MIT",
+  "php": "^5.4",
+  "require": {
+    "guzzlehttp/guzzle": "^6.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "MaartenGDev\\": "src/"
+    }
+  }
+}
