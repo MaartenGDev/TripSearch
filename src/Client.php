@@ -8,10 +8,15 @@ class Client implements ClientInterface
 {
     protected $client;
     protected $url;
+    /**
+     * @var Parser
+     */
+    private $parser;
 
-    public function __construct(GuzzleClient $client)
+    public function __construct(GuzzleClient $client, Parser $parser)
     {
         $this->client = $client;
+        $this->parser = $parser;
     }
 
     public function setUrl($url)
@@ -21,10 +26,15 @@ class Client implements ClientInterface
 
     public function put($data)
     {
-        $this->client->request('PUT', $this->url, [
-                'json' => $data
-            ]
-        );
+        try{
+            $this->client->request('PUT', $this->url, [
+                    'json' => $data
+                ]
+            );
+        }catch(\Exception $e){
+            var_dump($e->getMessage());
+        }
+
     }
 
     public function storeDate()
@@ -34,10 +44,15 @@ class Client implements ClientInterface
 
         foreach (json_decode($attractions) as $item) {
 
+            $shortDescription = strip_tags($item->details->nl->shortdescription);
+            $longDescription = strip_tags($item->details->nl->shortdescription);
+
+
             $data = [
                 'title' => $item->title,
-                'short_description' => $item->details->nl->shortdescription,
-                'long_description' => $item->details->nl->longdescription,
+                'short_description' => $shortDescription,
+                'long_description' => $longDescription,
+                'description_words' => array_values($this->parser->parse($longDescription)),
                 'location' => [
                     'name' => $item->location->name,
                     'city' => $item->location->city,
@@ -47,6 +62,7 @@ class Client implements ClientInterface
                     'longitude' => (float)str_replace(',', '.', $item->location->longitude)
                 ]
             ];
+
             $this->setUrl('http://localhost:9200/trips/attraction/' . $index);
             $this->put($data);
             $index++;
@@ -57,14 +73,9 @@ class Client implements ClientInterface
     {
         return $this->client->request('GET', 'http://localhost:9200/trips/attraction/_search', [
             'json' => [
-                'query' => [
-                    'match_phrase' => [
-                        'long_description' => 'object maakt onderdeel'
-                    ]
-                ],
-                'highlight' => [
-                    'fields' => [
-                        'long_description' => (object) []
+                "aggs" => [
+                    "all_descriptions" => [
+                        "terms" => ['field' => 'description_words'],
                     ]
                 ]
             ]

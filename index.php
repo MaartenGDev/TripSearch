@@ -1,7 +1,11 @@
 <?php
 require_once 'vendor/autoload.php';
 $guzzle = new GuzzleHttp\Client();
-$client = new \MaartenGDev\Client($guzzle);
+$source = $_SERVER['DOCUMENT_ROOT'] . '/cache/Attractions.json';
+$parser = new \MaartenGDev\DescriptionParser($source);
 
-echo htmlspecialchars($client->search());
+$client = new \MaartenGDev\Client($guzzle,$parser);
+
+
+echo $client->search();
 
