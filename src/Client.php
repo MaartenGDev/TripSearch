@@ -26,12 +26,12 @@ class Client implements ClientInterface
 
     public function put($data)
     {
-        try{
+        try {
             $this->client->request('PUT', $this->url, [
                     'json' => $data
                 ]
             );
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             var_dump($e->getMessage());
         }
 
@@ -69,13 +69,37 @@ class Client implements ClientInterface
         }
     }
 
-    public function search()
+    public function search($search)
     {
         return $this->client->request('GET', 'http://localhost:9200/trips/attraction/_search', [
             'json' => [
-                "aggs" => [
-                    "all_descriptions" => [
-                        "terms" => ['field' => 'description_words'],
+                "query" => [
+                    "match" => [
+                        'long_description' => $search,
+                    ]
+                ]
+            ]
+        ])->getBody()->read(20000);
+    }
+
+    public function searchAndExclude($search, $wordsToExclude)
+    {
+        $wordsToExclude = is_array($wordsToExclude) ? $wordsToExclude : $wordsToExclude;
+
+        return $this->client->request('GET', 'http://localhost:9200/trips/attraction/_search', [
+            'json' => [
+                'query' => [
+                    'bool' => [
+                        'must' => [
+                            'match' => [
+                                'long_description' => $search,
+                            ]
+                        ],
+                        'must_not' => [
+                            'match' => [
+                                'long_description' => $wordsToExclude
+                            ]
+                        ]
                     ]
                 ]
             ]

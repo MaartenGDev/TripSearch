@@ -7,5 +7,5 @@ $parser = new \MaartenGDev\DescriptionParser($source);
 $client = new \MaartenGDev\Client($guzzle,$parser);
 
 
-echo $client->search();
+echo $client->searchAndExclude('leuk','huwelijksvoltrekking');
 

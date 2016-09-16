@@ -15,7 +15,6 @@ class DescriptionParser implements Parser
         'schoon', 'mits', 'tenware', 'tenzij', 'naar', 'naargelang', 'naarmate,wanneer'
     ];
     protected $missingVerbs = ['ligt','heeft','ook','die','dan','hier','nog'];
-
     protected $punctuation = ['.','?','!',':',';',',','-'];
     protected $nouns = ['ik','mij','jij','je','jou','u','hij','hem','zij','ze','haar','hem','het','wij','we','ons','jullie','hun','hen','ze'];
 
