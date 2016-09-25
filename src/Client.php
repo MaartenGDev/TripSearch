@@ -53,6 +53,7 @@ class Client implements ClientInterface
                 'short_description' => $shortDescription,
                 'long_description' => $longDescription,
                 'description_words' => array_values($this->parser->parse($longDescription)),
+                'media' => $item->media,
                 'location' => [
                     'name' => $item->location->name,
                     'city' => $item->location->city,
