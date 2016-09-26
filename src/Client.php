@@ -84,8 +84,8 @@ class Client implements ClientInterface
                     'city' => $parking->woonplaats,
                     'address' => $parking->adres,
                     'zipcode' => $parking->postcode,
-                    'latitude' => $location->coordinates[0],
-                    'longitude' => $location->coordinates[1],
+                    'latitude' => $location->coordinates[1],
+                    'longitude' => $location->coordinates[0],
                 ]
             ];
         }, $data);
@@ -368,8 +368,8 @@ class Client implements ClientInterface
                     'city' => $item->location->city,
                     'address' => $item->location->adress,
                     'zipcode' => $item->location->zipcode,
-                    'latitude' => (float)str_replace(',', '.', $item->location->latitude),
-                    'longitude' => (float)str_replace(',', '.', $item->location->longitude)
+                    'latitude' => $this->convertCoordinate($item->location->latitude),
+                    'longitude' => $this->convertCoordinate($item->location->longitude)
                 ]
             ];
 

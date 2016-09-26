@@ -10,5 +10,5 @@ $parser = new DescriptionParser($source);
 
 $client = new Client($guzzle,$parser);
 
-var_dump($client->setupSearch());
+echo $client->searchAndExclude('ijs','gijt');
 
