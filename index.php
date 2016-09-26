@@ -10,5 +10,5 @@ $parser = new DescriptionParser($source);
 
 $client = new Client($guzzle,$parser);
 
-echo $client->search('geitenboerderij');
+var_dump($client->setupSearch());
 
