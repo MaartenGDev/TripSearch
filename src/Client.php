@@ -32,13 +32,99 @@ class Client implements ClientInterface
                 ]
             );
         } catch (\Exception $e) {
-            var_dump($e->getMessage());
+            echo $e->getMessage();
         }
 
     }
 
-    public function storeDate()
+    protected function  deleteIndex(){
+        $this->setUrl('http://localhost:9200');
+
+        try {
+            $this->client->request('DELETE', $this->url . '/trips');
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+        }
+
+    }
+
+    public function setupStructure()
     {
+
+        $data = [
+            'mappings' => (object)[
+                'attraction' => (object)[
+                    'properties' => [
+                        'title' => (object)[
+                            'type' => 'string',
+                        ],
+                        'dutch_title' => (object)[
+                            'type' => 'string',
+                            'analyzer' => 'dutch'
+                        ],
+                        'short_description' => (object)[
+                            'type' => 'string',
+                        ],
+                        'dutch_short_description' => (object)[
+                            'type' => 'string',
+                            'analyzer' => 'dutch'
+                        ],
+                        'long_description' => (object)[
+                            'type' => 'string',
+                        ],
+                        'dutch_long_description' => (object)[
+                            'type' => 'string',
+                            'analyzer' => 'dutch'
+                        ],
+                        'description_words' => [
+                            'type' => 'string'
+                        ],
+                        'media' => [
+                            'properties' => [
+                                'main' => [
+                                    'type' => 'string'
+                                ],
+                                'url' => [
+                                    'type' => 'string',
+                                ]
+                            ]
+                        ],
+                        'location' => [
+                            'properties' => [
+                                'name' => [
+                                    'type' => 'string'
+                                ],
+                                'city' => [
+                                    'type' => 'string',
+                                ],
+                                'address' => [
+                                    'type' => 'string',
+                                ],
+                                'zipcode' => [
+                                    'type' => 'string',
+                                ],
+                                'latitude' => [
+                                    'type' => 'double',
+                                ],
+                                'longitude' => [
+                                    'type' => 'double'
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        $this->setUrl('http://localhost:9200/trips');
+        $this->put($data);
+    }
+
+    public function setupSearch()
+    {
+        $this->deleteIndex();
+        $this->setupStructure();
+
         $attractions = file_get_contents('cache/Attracties.json');
         $index = 1;
 
@@ -51,13 +137,15 @@ class Client implements ClientInterface
             $data = [
                 'title' => $item->title,
                 'short_description' => $shortDescription,
+                'dutch_short_description' => $shortDescription,
                 'long_description' => $longDescription,
+                'dutch_long_description' => $longDescription,
                 'description_words' => array_values($this->parser->parse($longDescription)),
                 'media' => $item->media,
                 'location' => [
                     'name' => $item->location->name,
                     'city' => $item->location->city,
-                    'adress' => $item->location->adress,
+                    'address' => $item->location->adress,
                     'zipcode' => $item->location->zipcode,
                     'latitude' => (float)str_replace(',', '.', $item->location->latitude),
                     'longitude' => (float)str_replace(',', '.', $item->location->longitude)
@@ -93,12 +181,12 @@ class Client implements ClientInterface
                     'bool' => [
                         'must' => [
                             'match' => [
-                                'long_description' => $search,
+                                'dutch_long_description' => $search,
                             ]
                         ],
                         'must_not' => [
                             'match' => [
-                                'long_description' => $wordsToExclude
+                                'dutch_long_description' => $wordsToExclude
                             ]
                         ]
                     ]

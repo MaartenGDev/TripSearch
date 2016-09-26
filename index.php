@@ -4,12 +4,11 @@ use MaartenGDev\DescriptionParser;
 require_once 'vendor/autoload.php';
 
 $guzzle = new GuzzleHttp\Client();
-$source = $_SERVER['DOCUMENT_ROOT'] . '/cache/Attractions.json';
+$source = $_SERVER['DOCUMENT_ROOT'] . '/cache/verbs.json';
 
 $parser = new DescriptionParser($source);
 
 $client = new Client($guzzle,$parser);
 
-
-echo $client->searchAndExclude('leuk','huwelijksvoltrekking');
+echo $client->searchAndExclude('ijs','geiten');
 
