@@ -37,7 +37,8 @@ class Client implements ClientInterface
 
     }
 
-    protected function  deleteIndex(){
+    protected function deleteIndex()
+    {
         $this->setUrl('http://localhost:9200');
 
         try {
@@ -136,6 +137,7 @@ class Client implements ClientInterface
 
             $data = [
                 'title' => $item->title,
+                'dutch_title' => $item->title,
                 'short_description' => $shortDescription,
                 'dutch_short_description' => $shortDescription,
                 'long_description' => $longDescription,
@@ -160,33 +162,20 @@ class Client implements ClientInterface
 
     public function search($search)
     {
-        return $this->client->request('GET', 'http://localhost:9200/trips/attraction/_search', [
-            'json' => [
-                "query" => [
-                    "match" => [
-                        'long_description' => $search,
-                    ]
-                ]
-            ]
-        ])->getBody()->read(20000);
-    }
-
-    public function searchAndExclude($search, $wordsToExclude)
-    {
-        $wordsToExclude = is_array($wordsToExclude) ? $wordsToExclude : $wordsToExclude;
-
-        return $this->client->request('GET', 'http://localhost:9200/trips/attraction/_search', [
+        return $this->client->request('GET', 'http://localhost:9200/trips/attraction/_search?explain', [
             'json' => [
                 'query' => [
-                    'bool' => [
-                        'must' => [
-                            'match' => [
-                                'dutch_long_description' => $search,
-                            ]
-                        ],
-                        'must_not' => [
-                            'match' => [
-                                'dutch_long_description' => $wordsToExclude
+                    'dis_max' => [
+                        'queries' => [
+                            [
+                                "match" => [
+                                    "dutch_title" => $search
+                                ]
+                            ],
+                            [
+                                "match" => [
+                                    "dutch_long_description" => $search
+                                ]
                             ]
                         ]
                     ]
