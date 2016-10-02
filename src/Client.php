@@ -2,7 +2,6 @@
 namespace MaartenGDev;
 
 use GuzzleHttp\Client as GuzzleClient;
-use GuzzleHttp\Middleware;
 
 class Client implements ClientInterface
 {
@@ -12,11 +11,22 @@ class Client implements ClientInterface
      * @var Parser
      */
     private $parser;
+    /**
+     * @var Engine|SearchEngine
+     */
+    private $engine;
 
-    public function __construct(GuzzleClient $client, Parser $parser)
+    /**
+     * Client constructor.
+     * @param GuzzleClient $client
+     * @param Parser $parser
+     * @param Engine $engine
+     */
+    public function __construct(GuzzleClient $client, Parser $parser, SearchEngine $engine)
     {
         $this->client = $client;
         $this->parser = $parser;
+        $this->engine = $engine;
     }
 
     public function setUrl($url)
@@ -412,50 +422,14 @@ class Client implements ClientInterface
         }
     }
 
+
     public function search($search)
     {
-        return $this->client->request('GET', 'http://localhost:9200/trips/attraction/_search', [
-            'json' => [
-                'query' => [
-                    'dis_max' => [
-                        'queries' => [
-                            [
-                                "match" => [
-                                    "dutch_title" => $search
-                                ]
-                            ],
-                            [
-                                "match" => [
-                                    "dutch_long_description" => $search
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        ])->getBody()->read(20000);
-    }
+        $sentence = $this->engine->parse($search);
 
-    public function searchAndExclude($search, $wordsToExclude)
-    {
+        die();
+        $attraction = $this->engine->searchAttraction($search);
 
-        return $this->client->request('GET', 'http://localhost:9200/trips/attraction/_search', [
-            'json' => [
-                'query' => [
-                    'bool' => [
-                        'must' => [
-                            'match' => [
-                                'dutch_long_description' => $search,
-                            ]
-                        ],
-                        'must_not' => [
-                            'match' => [
-                                'dutch_long_description' => $wordsToExclude
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        ])->getBody()->read(200000);
+        return $attraction;
     }
 }

@@ -3,8 +3,9 @@
 namespace MaartenGDev;
 
 
-class DescriptionParser implements Parser
+class SentenceParser implements Parser
 {
+
     protected $verbs = [];
     protected $commonWords = ['de', 'het', 'een', 'te', 'er', 'dit', 'uit', 'tot', 'deze', 'aan', 'ook',
         'in', 'bij', 'van', 'waar', 'is', 'met', 'en', 'of', 'alsof', 'maar', 'doch', 'noch', 'dus', 'derhalve',
@@ -63,7 +64,7 @@ class DescriptionParser implements Parser
         $this->data = array_filter($this->data, function ($word) {
             return !in_array(strtolower($word), $this->punctuation);
         });
-
+        
 
         return $this;
     }
@@ -106,5 +107,4 @@ class DescriptionParser implements Parser
             ->removeMissedVerbs()
             ->get();
     }
-
 }
