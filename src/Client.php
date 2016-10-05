@@ -41,8 +41,10 @@ class Client implements ClientInterface
                     'json' => $data
                 ]
             );
-        } catch (\Exception $e) {
-            echo $e->getMessage();
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            echo $e->getResponse()->getBody()->getContents();
+            var_dump(debug_backtrace());
+            die();
         }
 
     }
@@ -72,34 +74,7 @@ class Client implements ClientInterface
 
     }
 
-    public function getParkData()
-    {
-        $json = file_get_contents('cache/park.json');
-        $data = json_decode($json)->parkeerlocaties;
 
-        return array_map(function ($parking) {
-            $parking = $parking->parkeerlocatie;
-
-            $location = json_decode($parking->Locatie);
-
-            return (object) [
-                'title' => $parking->title,
-                'dutch_title' => $parking->title,
-                'type' => $parking->type,
-                'url' => $parking->url,
-                'description' => $parking->opmerkingen,
-                'dutch_description' => $parking->opmerkingen,
-                'location' => (object) [
-                    'name' => $parking->woonplaats,
-                    'city' => $parking->woonplaats,
-                    'address' => $parking->adres,
-                    'zipcode' => $parking->postcode,
-                    'latitude' => $location->coordinates[1],
-                    'longitude' => $location->coordinates[0],
-                ]
-            ];
-        }, $data);
-    }
 
     protected function getParkingStructure()
     {
@@ -126,7 +101,7 @@ class Client implements ClientInterface
                         'type' => 'string',
                         'analyzer' => 'dutch'
                     ],
-                    'location' => [
+                    'location_details' => [
                         'properties' => [
                             'name' => [
                                 'type' => 'string'
@@ -139,14 +114,11 @@ class Client implements ClientInterface
                             ],
                             'zipcode' => [
                                 'type' => 'string',
-                            ],
-                            'latitude' => [
-                                'type' => 'double',
-                            ],
-                            'longitude' => [
-                                'type' => 'double'
                             ]
                         ]
+                    ],
+                    'location' => [
+                        'type' => 'geo_point'
                     ]
 
                 ]
@@ -193,7 +165,7 @@ class Client implements ClientInterface
                             ]
                         ]
                     ],
-                    'location' => [
+                    'location_details' => [
                         'properties' => [
                             'name' => [
                                 'type' => 'string'
@@ -206,14 +178,11 @@ class Client implements ClientInterface
                             ],
                             'zipcode' => [
                                 'type' => 'string',
-                            ],
-                            'latitude' => [
-                                'type' => 'double',
-                            ],
-                            'longitude' => [
-                                'type' => 'double'
                             ]
                         ]
+                    ],
+                    'location' => [
+                        'type' => 'geo_point'
                     ]
 
                 ]
@@ -260,7 +229,7 @@ class Client implements ClientInterface
                             ]
                         ]
                     ],
-                    'location' => [
+                    'location_details' => [
                         'properties' => [
                             'name' => [
                                 'type' => 'string'
@@ -273,14 +242,11 @@ class Client implements ClientInterface
                             ],
                             'zipcode' => [
                                 'type' => 'string',
-                            ],
-                            'latitude' => [
-                                'type' => 'double',
-                            ],
-                            'longitude' => [
-                                'type' => 'double'
                             ]
                         ]
+                    ],
+                    'location' => [
+                        'type' => 'geo_point'
                     ]
 
                 ]
@@ -314,14 +280,12 @@ class Client implements ClientInterface
 
     protected function addAttractionItems()
     {
-
         $data = file_get_contents('cache/Attractions.json');
         $index = 1;
         foreach (json_decode($data) as $item) {
 
             $shortDescription = strip_tags($item->details->nl->shortdescription);
             $longDescription = strip_tags($item->details->nl->shortdescription);
-
 
             $data = [
                 'title' => $item->title,
@@ -332,13 +296,15 @@ class Client implements ClientInterface
                 'dutch_long_description' => $longDescription,
                 'description_words' => array_values($this->parser->parse($longDescription)),
                 'media' => $item->media,
-                'location' => [
+                'location_details' => (object) [
                     'name' => $item->location->name,
                     'city' => $item->location->city,
                     'address' => $item->location->adress,
                     'zipcode' => $item->location->zipcode,
-                    'latitude' => $this->convertCoordinate($item->location->latitude),
-                    'longitude' => $this->convertCoordinate($item->location->longitude)
+                ],
+                'location' => (object) [
+                    'lat' => $this->convertCoordinate($item->location->latitude),
+                    'lon' => $this->convertCoordinate($item->location->longitude)
                 ]
             ];
 
@@ -346,8 +312,42 @@ class Client implements ClientInterface
             $this->put($data);
             $index++;
 
+
         }
+
     }
+
+    public function getParkData()
+    {
+        $json = file_get_contents('cache/park.json');
+        $data = json_decode($json)->parkeerlocaties;
+
+        return array_map(function ($parking) {
+            $parking = $parking->parkeerlocatie;
+
+            $location = json_decode($parking->Locatie);
+
+            return (object)[
+                'title' => $parking->title,
+                'dutch_title' => $parking->title,
+                'type' => $parking->type,
+                'url' => $parking->url,
+                'description' => $parking->opmerkingen,
+                'dutch_description' => $parking->opmerkingen,
+                'location_details' => (object) [
+                    'name' => $parking->woonplaats,
+                    'city' => $parking->woonplaats,
+                    'address' => $parking->adres,
+                    'zipcode' => $parking->postcode,
+                ],
+                'location' => (object)[
+                    'lat' => $location->coordinates[1],
+                    'lon' => $location->coordinates[0],
+                ]
+            ];
+        }, $data);
+    }
+
     protected function convertCoordinate($coordinate)
     {
         return (float)str_replace(',', '.', $coordinate);
@@ -373,13 +373,15 @@ class Client implements ClientInterface
                 'dutch_long_description' => $longDescription,
                 'description_words' => array_values($this->parser->parse($longDescription)),
                 'media' => $item->media,
-                'location' => [
+                'location_details' => (object) [
                     'name' => $item->location->name,
                     'city' => $item->location->city,
                     'address' => $item->location->adress,
-                    'zipcode' => $item->location->zipcode,
-                    'latitude' => $this->convertCoordinate($item->location->latitude),
-                    'longitude' => $this->convertCoordinate($item->location->longitude)
+                    'zipcode' => $item->location->zipcode
+                ],
+                'location' => (object) [
+                    'lat' => $this->convertCoordinate($item->location->latitude),
+                    'lon' => $this->convertCoordinate($item->location->longitude)
                 ]
             ];
 
@@ -390,7 +392,8 @@ class Client implements ClientInterface
         }
     }
 
-    protected function addParkingItems(){
+    protected function addParkingItems()
+    {
 
         $items = $this->getParkData();
         $index = 1;
@@ -403,16 +406,17 @@ class Client implements ClientInterface
                 'url' => $parking->url,
                 'description' => $parking->description,
                 'dutch_description' => $parking->dutch_description,
+                'location_details' => [
+                    'name' => $parking->location_details->name,
+                    'city' => $parking->location_details->city,
+                    'address' => $parking->location_details->address,
+                    'zipcode' => $parking->location_details->zipcode,
+                ],
                 'location' => [
-                    'name' => $parking->location->name,
-                    'city' => $parking->location->city,
-                    'address' => $parking->location->address,
-                    'zipcode' => $parking->location->zipcode,
-                    'latitude' => $this->convertCoordinate($parking->location->latitude),
-                    'longitude' => $this->convertCoordinate($parking->location->longitude)
+                    'lat' => $this->convertCoordinate($parking->location->lat),
+                    'lon' => $this->convertCoordinate($parking->location->lon)
                 ]
             ];
-
 
 
             $this->setUrl('http://localhost:9200/trips/parking/' . $index);

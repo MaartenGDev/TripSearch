@@ -8,7 +8,7 @@ class SentenceParser implements Parser
 
     protected $verbs = [];
     protected $commonWords = ['de', 'het', 'een', 'te', 'er', 'dit', 'uit', 'tot', 'deze', 'aan', 'ook',
-        'in', 'bij', 'van', 'waar', 'is', 'met', 'en', 'of', 'alsof', 'maar', 'doch', 'noch', 'dus', 'derhalve',
+        'in', 'bij', 'van', 'waar', 'is', 'met','daarna', 'of', 'alsof', 'maar', 'doch', 'noch', 'dus', 'derhalve',
         'daarom', 'doordat', 'door', 'terwijl', 'omdat', 'aangezien', 'want', 'daar', 'dewijl',
         'doordien', 'naardien', 'nademaal', 'overmits', 'vermits', 'wijl', 'indien', 'ingeval',
         'zo', 'zodat', 'opdat', 'sinds', 'sedert', 'nadat', 'vooraleer', 'voor', 'aleer', 'eer',
@@ -61,10 +61,7 @@ class SentenceParser implements Parser
 
     protected function removePunctuation()
     {
-        $this->data = array_filter($this->data, function ($word) {
-            return !in_array(strtolower($word), $this->punctuation);
-        });
-        
+        $this->data = str_replace($this->punctuation,'',$this->data);
 
         return $this;
     }
@@ -100,9 +97,9 @@ class SentenceParser implements Parser
 
         return $this->removeTags()
             ->splitIntoWords()
+            ->removePunctuation()
             ->removeVerbs()
             ->removeCommonWords()
-            ->removePunctuation()
             ->removeNouns()
             ->removeMissedVerbs()
             ->get();

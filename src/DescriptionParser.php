@@ -64,7 +64,6 @@ class DescriptionParser implements Parser
             return !in_array(strtolower($word), $this->punctuation);
         });
 
-
         return $this;
     }
 

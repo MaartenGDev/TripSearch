@@ -24,16 +24,66 @@ class SearchEngine implements Engine
 
     public function parse($data)
     {
-        $words = $this->parser->parse($data);
+        $sentence = implode(' ',$this->parser->parse($data));
+
+        $transportation = $this->getTransportation($sentence);
+
+        $sentence = $this->removeTransportation($sentence);
+
+        $attraction = $this->getAttractions($sentence);
+
+        $sentence = $this->removeAttraction($sentence);
+
+        $shop = $this->getShop($sentence);
+
+        $searchAttraction = $this->searchAttraction($attraction);
+
+        $searchShop = $this->searchShop($shop);
 
 
-        var_dump($words);
+        $shopLatitude = $searchAttraction->_source->location->lat;
+        $shopLongitude = $searchAttraction->_source->location->lon;
+
+        $searchTransportation = $this->searchParking($shopLatitude,$shopLongitude);
+
+        var_dump($searchShop);
+        var_dump($searchAttraction);
+        var_dump($searchTransportation);
+    }
+
+    protected function removeTransportation($sentence){
+        return str_replace(['auto','fiets'],'',$sentence);
+    }
+    protected function removeAttraction($sentence){
+        $words = explode(' en ',$sentence);
+        return $words[1];
+    }
+    protected function getShop($sentence){
+        return $sentence;
+    }
+
+    protected function getTransportation($sentence){
+        if(strpos($sentence, 'auto') !== false){
+            return 'car';
+        }
+
+        if(strpos($sentence, 'fiets') !== false){
+            return 'bicycle';
+        }
+
+        return 'car';
+    }
+
+    protected function getAttractions($sentence){
+        $words = explode(' en ',$sentence);
+
+        return $words[0];
     }
 
     public function searchAttraction($description)
     {
 
-        return $this->client->request('GET', 'http://localhost:9200/trips/attraction/_search', [
+        $data = $this->client->request('GET', 'http://localhost:9200/trips/attraction/_search', [
             'json' => [
                 'query' => [
                     'dis_max' => [
@@ -53,12 +103,14 @@ class SearchEngine implements Engine
                     ]
                 ]
             ]
-        ])->getBody()->read(20000);
+        ])->getBody()->read(200000);
+
+        return json_decode($data)->hits->hits[0];
     }
 
-    public function searchShop($type, $name)
+    public function searchShop($name)
     {
-        return $this->client->request('GET', 'http://localhost:9200/trips/shop/_search', [
+        $data = $this->client->request('GET', 'http://localhost:9200/trips/shop/_search', [
             'json' => [
                 'query' => [
                     'dis_max' => [
@@ -72,38 +124,37 @@ class SearchEngine implements Engine
                                 "match" => [
                                     "dutch_long_description" => $name
                                 ]
-                            ],
-                            [
-                                "match" => [
-                                    "dutch_long_description" => $type
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        ])->getBody()->read(20000);
-    }
-
-    public function searchParking($longitude, $latitude)
-    {
-        return $this->client->request('GET', 'http://localhost:9200/trips/attraction/_search', [
-            'json' => [
-                'query' => [
-                    'bool' => [
-                        'must' => [
-                            'match' => [
-                                'dutch_long_description' => '',
-                            ]
-                        ],
-                        'must_not' => [
-                            'match' => [
-                                'dutch_long_description' => ''
                             ]
                         ]
                     ]
                 ]
             ]
         ])->getBody()->read(200000);
+
+        return json_decode($data)->hits->hits[0];
+    }
+
+    public function searchParking($latitude, $longitude)
+    {
+        $data = $this->client->request('GET', 'http://localhost:9200/trips/parking/_search', [
+            'json' => [
+                'query' => [
+                    'filtered' => [
+                        'filter' => [
+                            'geo_distance' => [
+                                'distance' => '5km',
+                                'location' => [
+                                    'lat' => $latitude,
+                                    'lon' => $longitude
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ])->getBody()->read(200000);
+
+        return json_decode($data)->hits->hits[0];
+
     }
 }
