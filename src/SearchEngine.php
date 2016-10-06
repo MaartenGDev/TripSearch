@@ -46,18 +46,18 @@ class SearchEngine implements Engine
 
         $searchTransportation = $this->searchParking($shopLatitude,$shopLongitude);
 
-        var_dump($searchShop);
-        var_dump($searchAttraction);
-        var_dump($searchTransportation);
+        return ['shop' => $searchShop, 'attraction' => $searchAttraction, 'parking' => $searchTransportation];
     }
 
     protected function removeTransportation($sentence){
         return str_replace(['auto','fiets'],'',$sentence);
     }
+
     protected function removeAttraction($sentence){
         $words = explode(' en ',$sentence);
         return $words[1];
     }
+
     protected function getShop($sentence){
         return $sentence;
     }

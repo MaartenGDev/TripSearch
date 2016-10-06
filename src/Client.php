@@ -431,9 +431,6 @@ class Client implements ClientInterface
     {
         $sentence = $this->engine->parse($search);
 
-        die();
-        $attraction = $this->engine->searchAttraction($search);
-
-        return $attraction;
+        return $sentence;
     }
 }
