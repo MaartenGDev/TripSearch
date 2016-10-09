@@ -1,9 +1,9 @@
 <?php
 
-namespace MaartenGDev;
+namespace App\Parsers;
 
 
-interface Engine
+interface Parser
 {
     public function parse($data);
 }

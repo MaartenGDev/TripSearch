@@ -1,8 +1,9 @@
 <?php
 
-namespace MaartenGDev;
+namespace App\Engines;
 
 
+use App\Parsers\Parser;
 use GuzzleHttp\Client;
 
 class SearchEngine implements Engine

@@ -1,5 +1,5 @@
 <?php
-namespace MaartenGDev;
+namespace App;
 
 
 interface ClientInterface

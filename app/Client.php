@@ -1,7 +1,10 @@
 <?php
-namespace MaartenGDev;
+namespace App;
 
+use App\Engines\SearchEngine;
 use GuzzleHttp\Client as GuzzleClient;
+use App\Parsers\Parser;
+use GuzzleHttp\Exception\ClientException;
 
 class Client implements ClientInterface
 {
@@ -41,7 +44,7 @@ class Client implements ClientInterface
                     'json' => $data
                 ]
             );
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (ClientException $e) {
             echo $e->getResponse()->getBody()->getContents();
             var_dump(debug_backtrace());
             die();

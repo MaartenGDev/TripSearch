@@ -1,6 +1,6 @@
 <?php
 
-namespace MaartenGDev;
+namespace App\Transformers;
 
 
 interface Transformer
