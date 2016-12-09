@@ -1,8 +1,16 @@
 # Trip Search
 A trip search engine using **elasticsearch**
-## List View
+
+## Design 1
+### List View
 ![List View](https://raw.githubusercontent.com/MaartenGDev/TripSearch/master/assets/images/itemlist.png)
 
-
-## Details view
+### Details view
 ![Detail Views](https://raw.githubusercontent.com/MaartenGDev/TripSearch/master/assets/images/itemview.png)
+
+## Design 2
+### List View
+![Result Cards](assets/images/result__cards.png)
+
+### Details View
+![Result Item](assets/images/result__item.png)

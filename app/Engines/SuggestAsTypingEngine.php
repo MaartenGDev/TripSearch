@@ -56,7 +56,7 @@ class SuggestAsTypingEngine implements Engine
 
     protected function containsShop($sentence)
     {
-        return strpos($sentence, ' en ') !== false && count(explode(' en ', $sentence)) > 0;
+        return strpos($sentence, '  en ') !== false && count(explode(' en ', $sentence)) > 0;
     }
 
     protected function containsAttraction($sentence)
@@ -71,7 +71,8 @@ class SuggestAsTypingEngine implements Engine
 
         if (count($sentenceParts) > 1) {
             $startOfPart = strpos($sentence, $sentenceParts[0]);
-            $endOfPart = strpos($sentence, $sentenceParts[array_reverse(array_keys($sentenceParts))[0]]);
+            $lastWord = $sentenceParts[array_reverse(array_keys($sentenceParts))[0]];
+            $endOfPart = strpos($sentence, $lastWord) + strlen($lastWord);
         } else {
             $startOfPart = strpos($sentence, $part);
             $endOfPart = $startOfPart + strlen($part);

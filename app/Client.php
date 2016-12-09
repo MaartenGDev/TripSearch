@@ -285,6 +285,7 @@ class Client implements ClientInterface
     {
         $data = file_get_contents('cache/Attractions.json');
         $index = 1;
+
         foreach (json_decode($data) as $item) {
 
             $shortDescription = strip_tags($item->details->nl->shortdescription);
@@ -313,6 +314,7 @@ class Client implements ClientInterface
 
             $this->setUrl('http://localhost:9200/trips/attraction/' . $index);
             $this->put($data);
+
             $index++;
 
 

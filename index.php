@@ -27,7 +27,7 @@ $parkingTransformer = new ParkingTransformer();
 
 $searchTransformer = new SearchTransformer($attractionTransformer,$shopTransformer,$parkingTransformer);
 
-$sentence = isset($_POST['search']) && strlen($_POST['search']) > 5 ? htmlspecialchars($_POST['search']) : 'Met de auto naar een museum over kunst en daarna een ijsje eten.';
+$sentence = isset($_POST['search']) && strlen($_POST['search']) > 5 ? htmlspecialchars($_POST['search']) : 'Met de auto naar een museum over kunst en daarna chinees eten.';
 
 $searchTransformer->setSearchQuery($sentence);
 
