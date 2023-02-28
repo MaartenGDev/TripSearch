@@ -1,5 +1,5 @@
 # Trip Search
-A trip search engine using **elasticsearch**
+A trip search engine using **Elasticsearch**. This is the backend project for the [React Front-end](https://github.com/MaartenGDev/TripSearch-Client).
 
 ## Design 1
 ### List View
